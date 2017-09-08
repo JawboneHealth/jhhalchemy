@@ -1,0 +1,34 @@
+#
+# Pycharm
+#
+.idea
+
+#
+# Python
+#
+*.pyc
+
+#
+# emacs
+#
+*~
+
+#
+# pyenv
+#
+.python-version
+
+#
+# Mac OS
+#
+.DS_store
+
+#
+# Data Volumes
+#
+data/
+
+#
+# pytest
+#
+.cache
