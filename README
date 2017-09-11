@@ -1,0 +1,20 @@
+====================
+ Jawbone Health SQLAlchemy base model and CRUD methods
+====================
+
+This is the base model that all Jawbone Health MySQL models inherit from.
+
+JHHAlchemy defines a declarative base model for JHH database tables.
+
+To use the model:
+
+1. Once you've established the db object in your app, intialize jhhalchemy.
+
+import jhhalchemy
+jhhalchemy.init_db(<flask_sqlalchemy object>)
+
+2. Now you can import the base model and inherit from it.
+
+import jhhalchemy.models
+class MyModel(jhhalchemy.models.Base):
+    ...
