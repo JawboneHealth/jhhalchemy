@@ -2,8 +2,8 @@ from distutils.core import setup
 
 setup(
     name='jhhalchemy',
-    version='0.1',
-    packages=['jhhalchemy', 'jhhalchemy.models'],
+    version='0.2',
+    packages=['jhhalchemy'],
     url='https://bitbucket.aliph.com/projects/JHH/repos/jhhalchemy/browse',
     license='Apache',
     author='Ray Courtney',

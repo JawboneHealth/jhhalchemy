@@ -2,4 +2,4 @@
 README
 setup.py
 jhhalchemy/__init__.py
-jhhalchemy/models/__init__.py
+jhhalchemy/model.py
