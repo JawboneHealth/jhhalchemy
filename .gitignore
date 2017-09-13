@@ -32,3 +32,8 @@ data/
 # pytest
 #
 .cache
+
+#
+# pypi
+#
+dist/

@@ -1,8 +1,7 @@
 """
-Base model with CRUD methods (technically only R and D since we don't need explicit Create and Update methods on the
-model.
+Define the flask_sqlalchemy base model for JHH.
 """
-import jhhalchemy
+import flask_sqlalchemy
 import sqlalchemy
 
 
@@ -26,7 +25,7 @@ class BaseTypes(object):
         return [val for (key, val) in cls.__dict__.iteritems() if not key.startswith('__')]
 
 
-class Base(jhhalchemy.db.Model):
+class Base(flask_sqlalchemy.Model):
     """
     Base class for JHH DB models
     Defines common timestamp columns and CRUD methods.
@@ -34,19 +33,20 @@ class Base(jhhalchemy.db.Model):
     __abstract__ = True
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
-    time_removed = jhhalchemy.db.Column(jhhalchemy.db.Integer, default=NOT_REMOVED)
-    time_created = jhhalchemy.db.Column(jhhalchemy.db.Integer, default=sqlalchemy.func.unix_timestamp())
-    time_modified = jhhalchemy.db.Column(jhhalchemy.db.TIMESTAMP, onupdate=sqlalchemy.func.now())
+    time_removed = sqlalchemy.Column(sqlalchemy.Integer, default=NOT_REMOVED)
+    time_created = sqlalchemy.Column(sqlalchemy.Integer, default=sqlalchemy.func.unix_timestamp())
+    time_modified = sqlalchemy.Column(sqlalchemy.TIMESTAMP, onupdate=sqlalchemy.func.now())
 
-    def save(self, commit=True):
+    def save(self, session, commit=True):
         """
         Add a row to the session so that it gets saved to the DB.
 
+        :param session: flask_sqlalchemy session object
         :param commit: whether to issue the commit
         """
-        jhhalchemy.db.session.add(self)
+        session.add(self)
         if commit:
-            jhhalchemy.db.session.commit()
+            session.commit()
 
     @classmethod
     def read_by(cls, removed=False, **kwargs):
@@ -75,17 +75,18 @@ class Base(jhhalchemy.db.Model):
             return cls.query.filter(cls.time_removed == 0, *criteria)
         return cls.query.filter(*criteria)
 
-    def delete(self, commit=True, soft=True):
+    def delete(self, session, commit=True, soft=True):
         """
         Delete a row from the DB.
 
+        :param session: flask_sqlalchemy session object
         :param commit: whether to issue the commit
         :param soft: whether this is a soft delete (i.e., update time_removed)
         """
         if soft:
             self.time_removed = sqlalchemy.func.unix_timestamp()
         else:
-            jhhalchemy.db.session.delete(self)
+            session.delete(self)
 
         if commit:
-            jhhalchemy.db.session.commit()
+            session.commit()

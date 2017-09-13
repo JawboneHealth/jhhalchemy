@@ -6,11 +6,13 @@ To use this, you need to set MYSQL_CONNECTION_URI.
 The account you connect with should be able to:
 1. create database
 2. create a table in that database and have all access rights to it
+3. drop the created database
 
 Note: this might work with other databases besides mysql/maria, but we haven't tested that.
 """
 import flask
 import flask_sqlalchemy
+import jhhalchemy.model
 import pytest
 import sqlalchemy
 import sqlalchemy_utils
@@ -23,43 +25,55 @@ MYSQL_CONNECTION_URI = 'mysql://root:root@0.0.0.0/test_db'
 
 
 @pytest.fixture
-def model():
+def engine():
     """
-    Create an instance of a model that inherits from Base.
+    Creates SQLAlchemy engine
 
-    Setup:
-    1. Create DB if necessary
-    2. Initialize flask app, flask_sqlalchemy db, and jhhalchemy db
-    3. Define a model that inherits from Base
-    4. Create the table that corresponds to the model
-    5. Create an instance of the model
+    :return: engine object
+    """
+    return sqlalchemy.create_engine(MYSQL_CONNECTION_URI)
 
-    Tear-down:
-    1. Drop the DB
+
+@pytest.fixture
+def db(engine):
+    """
+    Create a flask_sqlalchemy object
+
+    :param engine: SQLAlchemy engine
+    :return: flask_sqlalchemy object
     """
     #
     # Create DB if it doesn't exist
     #
-    engine = sqlalchemy.create_engine(MYSQL_CONNECTION_URI)
     if not sqlalchemy_utils.database_exists(engine.url):
         sqlalchemy_utils.create_database(engine.url)
 
     #
-    # Initialize flask, flask_sqlalchemy, and jhhalchemy
+    # Initialize flask and flask_sqlalchemy
     #
     app = flask.Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONNECTION_URI
-    db = flask_sqlalchemy.SQLAlchemy(app)
-    import jhhalchemy
-    jhhalchemy.init_db(db)
-    import jhhalchemy.models
 
-    class NameModel(jhhalchemy.models.Base):
+    import jhhalchemy.model
+    db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    return db
+
+
+@pytest.fixture
+def model(engine, db):
+    """
+    Create an instance of a model that inherits from jhhalchemy.model.Base
+
+    :param engine: SQLAlchemy engine object
+    :param db: flask_sqlalchemy object
+    :return: the model instance
+    """
+    class NameModel(db.Model):
         """
         Simple model to test the Base methods
         """
-        test_id = jhhalchemy.db.Column(jhhalchemy.db.Integer, primary_key=True)
-        name = jhhalchemy.db.Column(jhhalchemy.db.String(255))
+        test_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+        name = sqlalchemy.Column(sqlalchemy.String(255))
 
         def __init__(self, name):
             self.name = name
@@ -78,17 +92,18 @@ def model():
     sqlalchemy_utils.drop_database(engine.url)
 
 
-def test_base(model):
+def test_base(db, model):
     """
     Verify the model's base methods.
 
+    :param db: flask_sqlalchemy object
     :param model: instantiated model fixture
     """
     #
     # Save should give you an id
     #
     assert model.test_id is None
-    model.save()
+    model.save(db.session)
     tester_id = model.test_id
     assert tester_id > 0
 
@@ -108,10 +123,9 @@ def test_base(model):
     #
     # delete should set time_removed
     #
-    import jhhalchemy.models
-    assert still_same_tester.time_removed == jhhalchemy.models.NOT_REMOVED
-    still_same_tester.delete()
-    assert still_same_tester.time_removed != jhhalchemy.models.NOT_REMOVED
+    assert still_same_tester.time_removed == jhhalchemy.model.NOT_REMOVED
+    still_same_tester.delete(db.session)
+    assert still_same_tester.time_removed != jhhalchemy.model.NOT_REMOVED
 
     #
     # read and read_by should now return nothing
@@ -132,5 +146,5 @@ def test_base(model):
     #
     # Ok, delete for real
     #
-    deleted_tester.delete(soft=False)
+    deleted_tester.delete(db.session, soft=False)
     assert cls.read_by(name=model.name).first() is None
