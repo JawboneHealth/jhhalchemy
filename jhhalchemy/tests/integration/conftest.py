@@ -1,7 +1,9 @@
 """
 pytest fixtures for setting up a DB connection and creating tables to verify the models' functionality.
 
-To use this, you need to set MYSQL_CONNECTION_URI.
+To use this, you need to set MYSQL_CONNECTION_URI as an ENV var. It defaults to:
+mysql://root:root@0.0.0.0/test_db
+
 The account you connect with should be able to:
 1. create database
 2. create a table in that database and have all access rights to it
@@ -11,14 +13,16 @@ Note: this might work with other databases besides mysql/maria, but we haven't t
 """
 import flask
 import flask_sqlalchemy
+import jhhalchemy.model
+import os
 import pytest
 import sqlalchemy
 import sqlalchemy_utils
 
 #
-# Set your own MYSQL connection string here
+# Grab MYSQL connection string from the environment
 #
-MYSQL_CONNECTION_URI = 'mysql://root:root@0.0.0.0/test_db'
+MYSQL_CONNECTION_URI = os.environ.get('MYSQL_CONNECTION_URI', 'mysql://root:root@0.0.0.0/test_db')
 
 
 @pytest.fixture(scope='session')
@@ -51,7 +55,6 @@ def db(engine):
     app = flask.Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONNECTION_URI
 
-    import jhhalchemy.model
     db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
     yield db
 
