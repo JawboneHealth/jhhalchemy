@@ -1,10 +1,10 @@
 # JHHAlchemy
 
-Jawbone Health Flask-SQLAlchemy base model and CRUD methods
+Jawbone Health Flask-SQLAlchemy base model and mixins
 
-## Usage
+## Base Model Usage
 
-To use this base model:
+To use the base model:
 
 1. Set it as the model_class when creating the flask_sqlalchemy object:
 ```python
@@ -28,6 +28,14 @@ my_model.save(db.session)
 my_model.delete(db.session)
 ```
 
-## Example
+## Mixin Usage
+To use a jhhalchemy mixin, simply include it in your model's inheritance list:
+```python
+import jhhalchemy.model.time_order
 
-Check out how the pytest.fixtures are created in [jhhalchemy/tests/integration/test_base.py](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/test_base.py)
+class MyTimeOrderModel(db.Model, jhhalchemy.model.time_order.TimeOrderMixin):
+```
+
+## Examples
+
+Check out how the fixtures are created in [jhhalchemy/tests/integration](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration)
