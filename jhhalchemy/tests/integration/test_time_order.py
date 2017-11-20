@@ -61,3 +61,10 @@ def test_time_order_base(model):
     toms = cls.read_time_range(start_timestamp=start_ts)
     nameset = set([tom.name for tom in toms])
     assert nameset == {'1', '2', '3'}
+
+    #
+    # end and another column
+    #
+    toms = cls.read_time_range(cls.name == '3', end_timestamp=20)
+    nameset = set([tom.name for tom in toms])
+    assert nameset == {'3'}

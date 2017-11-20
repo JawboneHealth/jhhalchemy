@@ -7,6 +7,8 @@ import sqlalchemy
 class TimeOrderMixin(object):
     """
     Mixin for tables with time_order columns used for reverse order sorting
+
+    Must be mixed with a model that inherits from jhhalchemy.model
     """
     time_order = sqlalchemy.Column(sqlalchemy.Integer)
 
@@ -29,7 +31,7 @@ class TimeOrderMixin(object):
         self.time_order = -timestamp
 
     @classmethod
-    def read_time_range(cls, start_timestamp=None, end_timestamp=None):
+    def read_time_range(cls, *args, **kwargs):
         """
         Get all timezones set within a given time. Uses time_dsc_index
 
@@ -38,13 +40,15 @@ class TimeOrderMixin(object):
         WHERE time_order <= -<start_timestamp>
         AND time_order >= -<end_timestamp>
 
-        :param start_timestamp: unix timestamp to start looking after
-        :param end_timestamp: unix timestamp to start looking before
+        :param args: SQLAlchemy filter criteria, (e.g., uid == uid, type == 1)
+        :param kwargs: start_timestamp and end_timestamp are the only kwargs, they specify the range (inclusive)
         :return: model generator
         """
-        criteria = []
-        if start_timestamp is not None:
-            criteria.append(cls.time_order <= -start_timestamp)
-        if end_timestamp is not None:
-            criteria.append(cls.time_order >= -end_timestamp)
+        criteria = list(args)
+        start = kwargs.get('start_timestamp')
+        end = kwargs.get('end_timestamp')
+        if start is not None:
+            criteria.append(cls.time_order <= -start)
+        if end is not None:
+            criteria.append(cls.time_order >= -end)
         return cls.read(*criteria)

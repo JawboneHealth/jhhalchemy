@@ -28,12 +28,20 @@ my_model.save(db.session)
 my_model.delete(db.session)
 ```
 
-## Mixin Usage
+## TimeOrderMixin Usage
 To use a jhhalchemy mixin, simply include it in your model's inheritance list:
 ```python
 import jhhalchemy.model.time_order
 
 class MyTimeOrderModel(db.Model, jhhalchemy.model.time_order.TimeOrderMixin):
+    """
+    Define additional columns, etc.
+    """
+    my_col = db.Column(...)
+    
+    @classmethod
+    def my_read_range(cls, my_col_value, start_timestamp, end_timestamp):
+        cls.read_time_range(my_col == my_col_value, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
 ```
 
 ## Examples

@@ -23,12 +23,16 @@ def test_read_time_range(mock_time_order):
 
     :param mock_time_order: mocked column
     """
+    col = 1
     start_ts = 1
     end_ts = 10
 
     #
     # Mock the criteria and the read method
     #
+    mock_col = mock.Mock()
+    mock_col.__eq__ = mock.Mock()
+    col_crit = mock_col == col
     mock_time_order.__le__ = mock.Mock()
     mock_time_order.__ge__ = mock.Mock()
     start_crit = mock_time_order <= -start_ts
@@ -36,12 +40,13 @@ def test_read_time_range(mock_time_order):
     jhhalchemy.model.time_order.TimeOrderMixin.read = mock.Mock()
 
     #
-    # Both timestamps
+    # Both timestamps and another column
     #
     timeorders = jhhalchemy.model.time_order.TimeOrderMixin.read_time_range(
+        mock_col == col,
         start_timestamp=start_ts,
         end_timestamp=end_ts)
-    jhhalchemy.model.time_order.TimeOrderMixin.read.assert_called_once_with(start_crit, end_crit)
+    jhhalchemy.model.time_order.TimeOrderMixin.read.assert_called_once_with(col_crit, start_crit, end_crit)
     assert timeorders == jhhalchemy.model.time_order.TimeOrderMixin.read.return_value
 
     #
