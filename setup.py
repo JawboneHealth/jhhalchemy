@@ -2,8 +2,8 @@ from distutils.core import setup
 
 setup(
     name='jhhalchemy',
-    version='0.2',
-    packages=['jhhalchemy'],
+    version='0.3',
+    packages=['jhhalchemy', 'jhhalchemy.model'],
     url='https://github.com/JawboneHealth/jhhalchemy',
     license='Apache',
     author='Ray Courtney',

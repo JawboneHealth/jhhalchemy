@@ -1,10 +1,10 @@
 # JHHAlchemy
 
-Jawbone Health Flask-SQLAlchemy base model and CRUD methods
+Jawbone Health Flask-SQLAlchemy base model and mixins
 
-## Usage
+## Base Model Usage
 
-To use this base model:
+To use the base model:
 
 1. Set it as the model_class when creating the flask_sqlalchemy object:
 ```python
@@ -28,6 +28,28 @@ my_model.save(db.session)
 my_model.delete(db.session)
 ```
 
-## Example
+## TimeOrderMixin Usage
+To use a jhhalchemy mixin, simply include it in your model's inheritance list:
+```python
+import jhhalchemy.model.time_order
 
-Check out how the pytest.fixtures are created in [jhhalchemy/tests/integration/test_base.py](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/test_base.py)
+class MyTimeOrderModel(db.Model, jhhalchemy.model.time_order.TimeOrderMixin):
+    """
+    Define additional columns, etc.
+    """
+    my_col = db.Column(...)
+    
+    @classmethod
+    def my_read_range(cls, my_col_value, start_timestamp, end_timestamp):
+        cls.read_time_range(my_col == my_col_value, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
+```
+
+## Examples
+
+Check out how the fixtures are created in
+[jhhalchemy/tests/integration/conftest.py](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/conftest.py).
+
+## Tests
+jhhalchemy includes unit and integration tests. Use [pytest](https://docs.pytest.org/en/latest/) to run them. For the 
+integration tests, you will need to set the `MYSQL_CONNECTION_URI` environment variable. You can find more details in 
+the [fixtures](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/conftest.py).
