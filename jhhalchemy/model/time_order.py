@@ -10,7 +10,7 @@ class TimeOrderMixin(object):
 
     Must be mixed with a model that inherits from jhhalchemy.model
     """
-    time_order = sqlalchemy.Column(sqlalchemy.Integer)
+    time_order = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
     @property
     def timestamp(self):

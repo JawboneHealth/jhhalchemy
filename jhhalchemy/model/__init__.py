@@ -33,9 +33,16 @@ class Base(flask_sqlalchemy.Model):
     __abstract__ = True
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
-    time_removed = sqlalchemy.Column(sqlalchemy.Integer, default=NOT_REMOVED)
-    time_created = sqlalchemy.Column(sqlalchemy.Integer, default=sqlalchemy.func.unix_timestamp())
-    time_modified = sqlalchemy.Column(sqlalchemy.TIMESTAMP, onupdate=sqlalchemy.func.now())
+    time_removed = sqlalchemy.Column(sqlalchemy.Integer, nullable=False, server_default='{}'.format(NOT_REMOVED))
+    time_created = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        nullable=False,
+        server_default=sqlalchemy.func.unix_timestamp())
+    time_modified = sqlalchemy.Column(
+        sqlalchemy.TIMESTAMP,
+        nullable=False,
+        server_onupdate=sqlalchemy.func.now(),
+        server_default=sqlalchemy.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
     def save(self, session, commit=True):
         """
