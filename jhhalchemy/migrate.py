@@ -52,8 +52,9 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     # Release the lock and close the connection.
     #
     cursor = engine.execute("SELECT RELEASE_LOCK('upgrade_{}')".format(dbname))
-    cursor.close
+    cursor.close()
     engine.dispose()
+    logging.info('Released {} upgrade lock'.format(dbname))
 
 
 def upgrade(dbname, connect_str, alembic_conf):
@@ -72,11 +73,10 @@ def upgrade(dbname, connect_str, alembic_conf):
         logging.info('Creating {}'.format(dbname))
         try:
             sqlalchemy_utils.create_database(connect_str)
-        except sqlalchemy.exc.ProgrammingError:
-            #
-            # TODO: Verify DB exists. Otherwise propagate the exception
-            #
-            logging.info('Someone else already created {}.'.format(dbname))
+        except sqlalchemy.exc.ProgrammingError as exc:
+            if not sqlalchemy_utils.database_exists(connect_str):
+                logging.error('Could not create {}'.format(dbname))
+                raise exc
 
     with get_upgrade_lock(dbname, connect_str):
         alembic_config = alembic.config.Config(

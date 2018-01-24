@@ -47,13 +47,13 @@ def db(connect_str):
     app = flask.Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 
-    db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
-    yield db
+    fs_db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    yield fs_db
 
     #
     # Tear down the DB.
     #
-    db.session.commit()
+    fs_db.session.commit()
     sqlalchemy_utils.drop_database(engine.url)
 
 
@@ -84,8 +84,8 @@ def test_upgrade(dbname, connect_str, db, model):
     alembic_conf = 'alembic/alembic.ini'
     assert not sqlalchemy_utils.database_exists(connect_str)
     jhhalchemy.migrate.upgrade(dbname, connect_str, alembic_conf)
+    assert sqlalchemy_utils.database_exists(connect_str)
     dt = model()
     assert dt.dt_id != 1
     dt.save(db.session)
     assert dt.dt_id == 1
-    assert sqlalchemy_utils.database_exists(connect_str)

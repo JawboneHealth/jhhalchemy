@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.5] - Unreleased
 ### Added
-- `jhhalchemy.migrate` module to provide functions to safely run [Alembic](http://alembic.zzzcomputing.com/) upgrades
+- `jhhalchemy.migrate` module with functions to create database locks and to safely run [Alembic](http://alembic.zzzcomputing.com/) upgrades
 
 ### Changed
 - Moved tests to root directory so they won't be included in the package.

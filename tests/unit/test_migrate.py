@@ -6,26 +6,33 @@ import mock
 
 
 @mock.patch('sqlalchemy.create_engine', autospec=True)
-def test_get_upgrade_lock(mock_create):
+@mock.patch('time.sleep', autospec=True)
+def test_get_upgrade_lock(mock_sleep, mock_create):
     """
     Verify locking calls
 
+    :param mock_sleep: mocked time.sleep
     :param mock_create: mocked sqlalchemy engine creation method
     """
     dbname = 'dbname'
     connect_str = 'connect_str'
 
     #
-    # TODO: Figure out how to get scalar to return None, then True
+    # Fail to get the lock on the first try. Succeed on the second.
     #
-    mock_create.return_value.execute.return_value.scalar.return_value = True
+    mock_create.return_value.execute.return_value.scalar.side_effect = [False, True]
     with jhhalchemy.migrate.get_upgrade_lock(dbname, connect_str) as lock:
         mock_create.assert_called_once_with(connect_str)
-        mock_create.return_value.execute.assert_called_once_with(
-            "SELECT GET_LOCK('upgrade_{}', {})".format(dbname, jhhalchemy.migrate.LOCK_TIMEOUT))
-        mock_create.return_value.execute.return_value.scalar.assert_called_once_with()
-        mock_create.return_value.execute.return_value.close.assert_called_once_with()
-        assert lock == mock_create.return_value.execute.return_value.scalar.return_value
+        mock_create.return_value.execute.assert_has_calls([
+            mock.call("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, jhhalchemy.migrate.LOCK_TIMEOUT)),
+            mock.call().scalar(),
+            mock.call().close(),
+            mock.call("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, jhhalchemy.migrate.LOCK_TIMEOUT)),
+            mock.call().scalar(),
+            mock.call().close()])
+        mock_sleep.assert_called_once_with(jhhalchemy.migrate.LOCK_TIMEOUT)
+        assert lock
+        mock_create.reset_mock()
     mock_create.return_value.execute.assert_called_with("SELECT RELEASE_LOCK('upgrade_{}')".format(dbname))
     mock_create.return_value.execute.return_value.close.assert_called_with()
     mock_create.return_value.dispose.assert_called_once_with()
