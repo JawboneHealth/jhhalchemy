@@ -73,6 +73,9 @@ def upgrade(dbname, connect_str, alembic_conf):
         try:
             sqlalchemy_utils.create_database(connect_str)
         except sqlalchemy.exc.ProgrammingError:
+            #
+            # TODO: Verify DB exists. Otherwise propagate the exception
+            #
             logging.info('Someone else already created {}.'.format(dbname))
 
     with get_upgrade_lock(dbname, connect_str):
