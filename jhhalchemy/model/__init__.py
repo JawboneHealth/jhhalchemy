@@ -24,6 +24,15 @@ class BaseTypes(object):
         """
         return [val for (key, val) in cls.__dict__.iteritems() if not key.startswith('__')]
 
+    @classmethod
+    def keys(cls):
+        """
+        Return the keys of the properties
+
+        :return: list of values
+        """
+        return [key for key in cls.__dict__.keys() if not key.startswith('__')]
+
 
 class Base(flask_sqlalchemy.Model):
     """
