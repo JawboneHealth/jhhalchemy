@@ -11,20 +11,6 @@ import sqlalchemy
 NOT_REMOVED = 0
 
 
-class BaseTypes(object):
-    """
-    Base class for type column constants.
-    """
-    @classmethod
-    def values(cls):
-        """
-        Return the values of the properties (i.e., the type IDs)
-
-        :return: list of values
-        """
-        return [val for (key, val) in cls.__dict__.iteritems() if not key.startswith('__')]
-
-
 class Base(flask_sqlalchemy.Model):
     """
     Base class for JHH DB models

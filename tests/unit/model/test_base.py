@@ -7,41 +7,11 @@ import pytest
 
 
 @pytest.fixture
-def base_types():
-    """
-    Modify the BaseTypes class to include some testable properties.
-    """
-    #
-    # Add some fake properties
-    #
-    jhhalchemy.model.BaseTypes.login = 1
-    jhhalchemy.model.BaseTypes.__login__ = 2
-    yield jhhalchemy.model.BaseTypes
-
-    #
-    # Teardown: Remove the fake properties
-    #
-    del jhhalchemy.model.BaseTypes.login
-    del jhhalchemy.model.BaseTypes.__login__
-
-
-def test_BaseTypes_values(base_types):
-    """
-    Verify that values only returns expected properties.
-
-    :param base_types: BaseTypes fixture
-    """
-    values = base_types.values()
-    assert base_types.login in values
-    assert base_types.__login__ not in values
-
-
-@pytest.fixture
 def base_instance():
     return jhhalchemy.model.Base()
 
 
-def test_Base_save(base_instance):
+def test_base_save(base_instance):
     """
     Verify add and commit to DB.
 
@@ -66,7 +36,7 @@ def test_Base_save(base_instance):
 
 
 @mock.patch('jhhalchemy.model.Base.query', autospec=True)
-def test_Base_read_by(mock_query):
+def test_base_read_by(mock_query):
     """
     Verify soft-delete logic in read_by
 
@@ -89,7 +59,7 @@ def test_Base_read_by(mock_query):
 @mock.patch('jhhalchemy.model.Base.query', autospec=True)
 @mock.patch('jhhalchemy.model.Base.time_created', autospec=True)
 @mock.patch('jhhalchemy.model.Base.time_removed', autospec=True)
-def test_Base_read(mock_time_removed, mock_time_created, mock_query):
+def test_base_read(mock_time_removed, mock_time_created, mock_query):
     """
     Verify soft-delete logic in read
 
@@ -112,7 +82,7 @@ def test_Base_read(mock_time_removed, mock_time_created, mock_query):
 
 
 @mock.patch('sqlalchemy.func.unix_timestamp', autospec=True)
-def test_Base_delete(mock_ut, base_instance):
+def test_base_delete(mock_ut, base_instance):
     """
     Verify soft delete and commit logic
 
