@@ -55,11 +55,11 @@ def db(engine):
     app = flask.Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONNECTION_URI
 
-    db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
-    yield db
+    fs_db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    yield fs_db
 
     #
     # Tear down the DB.
     #
-    db.session.commit()
+    fs_db.session.commit()
     sqlalchemy_utils.drop_database(engine.url)

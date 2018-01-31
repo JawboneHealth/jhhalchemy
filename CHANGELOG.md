@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5] - Unreleased
+### Added
+- `jhhalchemy.migrate` module with functions to create database locks and to safely run [Alembic](http://alembic.zzzcomputing.com/) upgrades
+
+### Changed
+- Moved tests to root directory so they won't be included in the package.
+
 ## [0.4] - 2018-01-11
 ### Changed
 - Updated column definitions in Base and TimeOrder to correctly autogenerate alembic migrations

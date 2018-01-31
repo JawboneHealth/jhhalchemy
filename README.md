@@ -44,10 +44,19 @@ class MyTimeOrderModel(db.Model, jhhalchemy.model.time_order.TimeOrderMixin):
         cls.read_time_range(my_col == my_col_value, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
 ```
 
+## Migrations
+The `jhhalchemy.migrate` module provides some utility functions to obtain database locks and safely run an
+[Alembic](http://alembic.zzzcomputing.com/) upgrade:
+```python
+jhhalchemy.migrate.upgrade(
+    'my_database', 
+    'mysql://root:root@0.0.0.0/my_database', 
+    'alembic.ini')
+```
 ## Examples
 
 Check out how the fixtures are created in
-[jhhalchemy/tests/integration/conftest.py](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/conftest.py).
+[tests/integration/conftest.py](https://github.com/JawboneHealth/jhhalchemy/blob/master/tests/integration/conftest.py).
 
 ## Tests
 jhhalchemy includes unit and integration tests. Use [pytest](https://docs.pytest.org/en/latest/) to run them. For the 
