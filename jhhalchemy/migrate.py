@@ -10,12 +10,16 @@ import sqlalchemy.exc
 import sqlalchemy_utils
 import time
 
-
 #
 # Default timeout to 5 seconds
 #
 LOCK_TIMEOUT = 5
 
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter(' * JHHAlchemy - %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 @contextlib.contextmanager
 def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
@@ -40,12 +44,12 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     # Keep trying until you get it.
     #
     while not lock:
-        logging.info('Cannot acquire {} upgrade lock. Sleeping {} seconds.'.format(dbname, timeout))
+        logger.info('Cannot acquire {} upgrade lock. Sleeping {} seconds.'.format(dbname, timeout))
         time.sleep(timeout)
         cursor = engine.execute("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, timeout))
         lock = cursor.scalar()
         cursor.close()
-    logging.info('Acquired {} upgrade lock'.format(dbname))
+    logger.info('Acquired {} upgrade lock'.format(dbname))
     yield lock
 
     #
@@ -54,7 +58,7 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     cursor = engine.execute("SELECT RELEASE_LOCK('upgrade_{}')".format(dbname))
     cursor.close()
     engine.dispose()
-    logging.info('Released {} upgrade lock'.format(dbname))
+    logger.info('Released {} upgrade lock'.format(dbname))
 
 
 def upgrade(dbname, connect_str, alembic_conf):
@@ -70,17 +74,17 @@ def upgrade(dbname, connect_str, alembic_conf):
     # checking if it exists and running the create, ignore the exception.
     #
     if not sqlalchemy_utils.database_exists(connect_str):
-        logging.info('Creating {}'.format(dbname))
+        logger.info('Creating {}'.format(dbname))
         try:
             sqlalchemy_utils.create_database(connect_str)
         except sqlalchemy.exc.ProgrammingError as exc:
             if not sqlalchemy_utils.database_exists(connect_str):
-                logging.error('Could not create {}'.format(dbname))
+                logger.error('Could not create {}'.format(dbname))
                 raise exc
 
     with get_upgrade_lock(dbname, connect_str):
         alembic_config = alembic.config.Config(
             alembic_conf,
             attributes={'configure_logger': False})
-        logging.info('Upgrading {} to head'.format(dbname))
+        logger.info('Upgrading {} to head'.format(dbname))
         alembic.command.upgrade(alembic_config, 'head')
