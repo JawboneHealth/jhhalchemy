@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='jhhalchemy',
-    version='0.6',
+    version='0.6.1',
     packages=['jhhalchemy', 'jhhalchemy.model'],
     url='https://github.com/JawboneHealth/jhhalchemy',
     license='Apache',
