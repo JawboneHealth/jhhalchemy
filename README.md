@@ -62,3 +62,4 @@ Check out how the fixtures are created in
 jhhalchemy includes unit and integration tests. Use [pytest](https://docs.pytest.org/en/latest/) to run them. For the 
 integration tests, you will need to set the `MYSQL_CONNECTION_URI` environment variable. You can find more details in 
 the [fixtures](https://github.com/JawboneHealth/jhhalchemy/blob/master/jhhalchemy/tests/integration/conftest.py).
+
