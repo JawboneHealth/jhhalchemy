@@ -97,17 +97,3 @@ def get_by_range(model_cls, *args, **kwargs):
         models = models[:index]
 
     return models
-
-
-def get_latest(model_cls, *args, **kwargs):
-    """
-    Get the most recent model before end_timestamp. If end_timestamp is not specified, return the most recent
-    timezone.
-
-    :param model_cls: the class of the model to return
-    :param args: arguments specific to the model class
-    :param kwargs: end_timestamp (see below) as well as keyword args specific to the model class
-    :keyword end_timestamp: retrieve the model set right before (or on) this timestamp, defaults to now
-    :return: timezone model
-    """
-    return get_by_range(model_cls, *args, end_timestamp=kwargs.get('end_timestamp')).first()
