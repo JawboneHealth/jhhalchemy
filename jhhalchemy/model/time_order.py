@@ -55,7 +55,7 @@ class TimeOrderMixin(object):
 
 
 """
-Helper Functions for APIs that interact with time_order models
+Helper Function for APIs that interact with time_order models
 """
 
 
