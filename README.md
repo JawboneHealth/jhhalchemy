@@ -44,6 +44,18 @@ class MyTimeOrderModel(db.Model, jhhalchemy.model.time_order.TimeOrderMixin):
         cls.read_time_range(my_col == my_col_value, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
 ```
 
+### TimeOrder Helper
+The time_order mixin has a helper function called `get_by_range`. The module provides this function because we were
+writing some form of it for every model that used time_order. Here is an example of a model-specific wrapper:
+```python
+def get_locations_by_range(uid, start_timestamp=None, end_timestamp=None):
+    return jhhalchemy.model.time_order.get_by_range(
+        jhhuser.models.location.Location,
+        uid,
+        start_timestamp=start_timestamp,
+        end_timestamp=end_timestamp)
+```
+
 ## Migrations
 The `jhhalchemy.migrate` module provides some utility functions to obtain database locks and safely run an
 [Alembic](http://alembic.zzzcomputing.com/) upgrade:
