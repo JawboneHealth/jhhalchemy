@@ -9,7 +9,7 @@ import pytest
 import sqlalchemy
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def model(db):
     """
     Create model instances and return one
@@ -68,3 +68,67 @@ def test_time_order_base(model):
     toms = cls.read_time_range(cls.name == '3', end_timestamp=20)
     nameset = set([tom.name for tom in toms])
     assert nameset == {'3'}
+
+
+def test_get_by_range(model):
+    """
+    Verify helper getter
+
+    :param model: test model fixture
+    """
+    model_cls = model.__class__
+
+    #
+    # start > end -> Raise
+    #
+    start_ts = 10
+    end_ts = 1
+    with pytest.raises(jhhalchemy.model.time_order.InvalidTimestampRange):
+        jhhalchemy.model.time_order.get_by_range(model_cls, start_timestamp=start_ts, end_timestamp=end_ts)
+
+    #
+    # Don't specify range -> read
+    #
+    toms = jhhalchemy.model.time_order.get_by_range(model_cls)
+    nameset = set([tom.name for tom in toms])
+    assert nameset == {'1', '2', '3'}
+
+    #
+    # start <= end -> read
+    #
+    # model between start and end
+    # model on start
+    # model before start
+    # => [between, on start]
+    start_ts = 10
+    end_ts = 40
+    toms = jhhalchemy.model.time_order.get_by_range(model_cls, start_timestamp=start_ts, end_timestamp=end_ts)
+    assert [tom.timestamp for tom in toms] == [20, 10]
+
+    #
+    # Another read case
+    #
+    # model on end
+    # model between start and end
+    # model before start
+    # => [on end, between, before start]
+    #
+    start_ts = 5
+    end_ts = 20
+    toms = jhhalchemy.model.time_order.get_by_range(model_cls, start_timestamp=start_ts, end_timestamp=end_ts)
+    assert [tom.timestamp for tom in toms] == [20, 10, 1]
+
+    #
+    # No models in the range => [most recent]
+    #
+    start_ts = 100
+    end_ts = 150
+    toms = jhhalchemy.model.time_order.get_by_range(model_cls, start_timestamp=start_ts, end_timestamp=end_ts)
+    assert [tom.timestamp for tom in toms] == [20]
+
+    #
+    # No models before the range => []
+    #
+    end_ts = 0
+    toms = jhhalchemy.model.time_order.get_by_range(model_cls, end_timestamp=end_ts)
+    assert [tom.timestamp for tom in toms] == []

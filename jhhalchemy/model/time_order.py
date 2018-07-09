@@ -52,3 +52,48 @@ class TimeOrderMixin(object):
         if end is not None:
             criteria.append(cls.time_order >= -end)
         return cls.read(*criteria)
+
+
+"""
+Helper Function for APIs that interact with time_order models
+"""
+
+
+class InvalidTimestampRange(Exception):
+    """
+    Raise this when start_timestamp > end_timestamp
+    """
+    pass
+
+
+def get_by_range(model_cls, *args, **kwargs):
+    """
+    Get ordered list of models for the specified time range.
+    The timestamp on the earliest model will likely occur before start_timestamp. This is to ensure that we return
+    the models for the entire range.
+
+    :param model_cls: the class of the model to return
+    :param args: arguments specific to the model class
+    :param kwargs: start_timestamp and end_timestamp (see below) as well as keyword args specific to the model class
+    :keyword start_timestamp: the most recent models set before this and all after, defaults to 0
+    :keyword end_timestamp: only models set before (and including) this timestamp, defaults to now
+    :return: model generator
+    """
+    start_timestamp = kwargs.get('start_timestamp')
+    end_timestamp = kwargs.get('end_timestamp')
+    if (start_timestamp is not None) and (end_timestamp is not None) and (start_timestamp > end_timestamp):
+        raise InvalidTimestampRange
+
+    models = model_cls.read_time_range(*args, end_timestamp=end_timestamp).order_by(model_cls.time_order)
+
+    #
+    # start time -> Loop through until you find one set before or on start
+    #
+    if start_timestamp is not None:
+        index = 0
+        for index, model in enumerate(models, start=1):
+            if model.timestamp <= start_timestamp:
+                break
+        models = models[:index]
+
+    return models
