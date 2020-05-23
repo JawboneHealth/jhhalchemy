@@ -77,23 +77,24 @@ def get_by_range(model_cls, *args, **kwargs):
     :param kwargs: start_timestamp and end_timestamp (see below) as well as keyword args specific to the model class
     :keyword start_timestamp: the most recent models set before this and all after, defaults to 0
     :keyword end_timestamp: only models set before (and including) this timestamp, defaults to now
+    :keyword asc: boolean, if set orders timestamps in ascending order
     :return: model generator
     """
     start_timestamp = kwargs.get('start_timestamp')
     end_timestamp = kwargs.get('end_timestamp')
+    asc = kwargs.get('asc')
+
     if (start_timestamp is not None) and (end_timestamp is not None) and (start_timestamp > end_timestamp):
         raise InvalidTimestampRange
 
-    models = model_cls.read_time_range(*args, end_timestamp=end_timestamp).order_by(model_cls.time_order)
-
-    #
-    # start time -> Loop through until you find one set before or on start
-    #
-    if start_timestamp is not None:
-        index = 0
-        for index, model in enumerate(models, start=1):
-            if model.timestamp <= start_timestamp:
-                break
-        models = models[:index]
+    if asc is not None and asc is True:
+        # To order ascending, the DB needs to order *descending* due to the negation on the time_order column
+        models = model_cls.read_time_range(*args,
+                                           start_timestamp=start_timestamp,
+                                           end_timestamp=end_timestamp).order_by(model_cls.time_order.dssc())
+    else:
+        models = model_cls.read_time_range(*args,
+                                           start_timestamp=start_timestamp,
+                                           end_timestamp=end_timestamp).order_by(model_cls.time_order)
 
     return models
