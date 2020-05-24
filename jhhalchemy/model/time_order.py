@@ -2,6 +2,7 @@
 flask_sqlachemy model mixin for TimeOrder tables
 """
 import sqlalchemy
+from sqlalchemy import desc
 
 
 class TimeOrderMixin(object):
@@ -91,7 +92,7 @@ def get_by_range(model_cls, *args, **kwargs):
         # To order ascending, the DB needs to order *descending* due to the negation on the time_order column
         models = model_cls.read_time_range(*args,
                                            start_timestamp=start_timestamp,
-                                           end_timestamp=end_timestamp).order_by(model_cls.time_order.dssc())
+                                           end_timestamp=end_timestamp).order_by(desc(model_cls.time_order))
     else:
         models = model_cls.read_time_range(*args,
                                            start_timestamp=start_timestamp,
