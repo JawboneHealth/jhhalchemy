@@ -5,7 +5,6 @@ import jhhalchemy.model
 import mock
 import pytest
 
-
 @pytest.fixture
 def base_instance():
     return jhhalchemy.model.Base()

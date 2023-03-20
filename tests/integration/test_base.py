@@ -11,7 +11,7 @@ import time
 
 
 @pytest.fixture
-def model(db):
+def model(db, app):
     """
     Create a model instance.
 
@@ -25,11 +25,12 @@ def model(db):
         name_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
         name = sqlalchemy.Column(sqlalchemy.String(255))
 
-    db.create_all()
+    with app.app_context():
+        db.create_all()
     return NameModel(name='tester{}'.format(time.time()))
 
 
-def test_base(db, model):
+def test_base(db, app, model):
     """
     Verify the model's base methods.
 
@@ -40,7 +41,8 @@ def test_base(db, model):
     # Save should give you an id
     #
     assert model.name_id is None
-    model.save(db.session)
+    with app.app_context():
+        model.save(db.session)
     tester_id = model.name_id
     assert tester_id > 0
 

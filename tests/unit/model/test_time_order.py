@@ -64,7 +64,7 @@ def test_get_timezones_by_range():
     Verify range lookup.
     """
     col = 1
-    model_cls = mock.Mock()
+    model_cls = mock.Mock(jhhalchemy.model.time_order.TimeOrderMixin)
 
     #
     # start > end -> Raise
@@ -80,7 +80,7 @@ def test_get_timezones_by_range():
     # Don't specify range -> read
     #
     models = jhhalchemy.model.time_order.get_by_range(model_cls, col)
-    model_cls.read_time_range.assert_called_once_with(col, end_timestamp=None)
+    model_cls.read_time_range.assert_called_once_with(col, start_timestamp=None, end_timestamp=None)
     model_cls.read_time_range.return_value.order_by.assert_called_once_with(model_cls.time_order)
     assert models == model_cls.read_time_range.return_value.order_by.return_value
 
@@ -98,9 +98,9 @@ def test_get_timezones_by_range():
         mock.Mock(timestamp=start_ts),
         mock.Mock(timestamp=start_ts - 1)]
     models = jhhalchemy.model.time_order.get_by_range(model_cls, col, start_timestamp=start_ts, end_timestamp=end_ts)
-    model_cls.read_time_range.assert_called_once_with(col, end_timestamp=end_ts)
+    model_cls.read_time_range.assert_called_once_with(col, start_timestamp=start_ts, end_timestamp=end_ts)
     model_cls.read_time_range.return_value.order_by.assert_called_once_with(model_cls.time_order)
-    assert models == model_cls.read_time_range.return_value.order_by.return_value[:2]
+    assert models == model_cls.read_time_range.return_value.order_by.return_value[:]
 
     #
     # Another read case
@@ -116,7 +116,7 @@ def test_get_timezones_by_range():
         mock.Mock(timestamp=end_ts - 1),
         mock.Mock(timestamp=start_ts - 1)]
     models = jhhalchemy.model.time_order.get_by_range(model_cls, col, start_timestamp=start_ts, end_timestamp=end_ts)
-    model_cls.read_time_range.assert_called_once_with(col, end_timestamp=end_ts)
+    model_cls.read_time_range.assert_called_once_with(col, start_timestamp=start_ts, end_timestamp=end_ts)
     model_cls.read_time_range.return_value.order_by.assert_called_once_with(model_cls.time_order)
     assert models == model_cls.read_time_range.return_value.order_by.return_value
 
@@ -126,6 +126,6 @@ def test_get_timezones_by_range():
     model_cls.reset_mock()
     model_cls.read_time_range.return_value.order_by.return_value = []
     models = jhhalchemy.model.time_order.get_by_range(model_cls, col, start_timestamp=start_ts)
-    model_cls.read_time_range.assert_called_once_with(col, end_timestamp=None)
+    model_cls.read_time_range.assert_called_once_with(col, start_timestamp=start_ts, end_timestamp=None)
     model_cls.read_time_range.return_value.order_by.assert_called_once_with(model_cls.time_order)
     assert models == []

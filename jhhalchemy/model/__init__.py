@@ -11,7 +11,7 @@ import sqlalchemy
 NOT_REMOVED = 0
 
 
-class Base(flask_sqlalchemy.Model):
+class Base(flask_sqlalchemy.SQLAlchemy):
     """
     Base class for JHH DB models
     Defines common timestamp columns and CRUD methods.

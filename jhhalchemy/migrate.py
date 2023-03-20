@@ -35,8 +35,11 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     #
     # Open connection and try to get the lock
     #
+    query_getlock = sqlalchemy.text("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, timeout))
     engine = sqlalchemy.create_engine(connect_str)
-    cursor = engine.execute("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, timeout))
+    with engine.begin() as connection:
+        cursor = connection.execute(query_getlock)
+
     lock = cursor.scalar()
     cursor.close()
 
@@ -46,7 +49,8 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     while not lock:
         logger.info('Cannot acquire {} upgrade lock. Sleeping {} seconds.'.format(dbname, timeout))
         time.sleep(timeout)
-        cursor = engine.execute("SELECT GET_LOCK('upgrade_{}', {})".format(dbname, timeout))
+        with engine.begin() as connection:
+            cursor = connection.execute(query_getlock)
         lock = cursor.scalar()
         cursor.close()
     logger.info('Acquired {} upgrade lock'.format(dbname))
@@ -55,7 +59,9 @@ def get_upgrade_lock(dbname, connect_str, timeout=LOCK_TIMEOUT):
     #
     # Release the lock and close the connection.
     #
-    cursor = engine.execute("SELECT RELEASE_LOCK('upgrade_{}')".format(dbname))
+    query_releaselock = sqlalchemy.text("SELECT RELEASE_LOCK('upgrade_{}')".format(dbname))
+    with engine.begin() as connection:
+        cursor = connection.execute(query_releaselock)
     cursor.close()
     engine.dispose()
     logger.info('Released {} upgrade lock'.format(dbname))
