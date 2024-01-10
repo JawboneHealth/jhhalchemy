@@ -1,8 +1,9 @@
-alembic==0.9.6
-Flask==0.12.1
-Flask-SQLAlchemy==2.2
-mock==2.0.0
-MySQL-python==1.2.5
-pytest==3.2.1
-SQLAlchemy==1.2.0
-SQLAlchemy-Utils==0.32.21
+alembic==1.9.0
+Flask>=2.2.0
+Flask-SQLAlchemy==3.0.3
+mock==5.0.1
+# MySQL-python==1.2.5
+mysqlclient==1.4.6
+pytest==7.2.2
+SQLAlchemy==2.0.4
+SQLAlchemy-Utils==0.40.0

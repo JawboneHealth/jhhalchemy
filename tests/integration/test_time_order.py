@@ -10,7 +10,7 @@ import sqlalchemy
 
 
 @pytest.fixture(scope='session')
-def model(db):
+def model(db, app):
     """
     Create model instances and return one
 
@@ -24,8 +24,10 @@ def model(db):
         name_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
         name = sqlalchemy.Column(sqlalchemy.String(255))
 
-    db.create_all()
-    for i in xrange(1, 4):
+    with app.app_context():
+        db.create_all()
+
+    for i in range(1, 4):
         tom = TimeOrderModel(name='{}'.format(i), time_order=-10 * i)
         tom.save(db.session)
     return tom

@@ -12,7 +12,7 @@ The account you connect with should be able to:
 Note: this might work with other databases besides mysql/maria, but we haven't tested that.
 """
 import flask
-import flask_sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
 import jhhalchemy.model
 import os
 import pytest
@@ -36,7 +36,19 @@ def engine():
 
 
 @pytest.fixture(scope='session')
-def db(engine):
+def app():
+    """
+    Creates a flask app
+
+    :return: flask app
+    """
+    app = flask.Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONNECTION_URI
+    return app
+
+
+@pytest.fixture(scope='session')
+def db(engine, app):
     """
     Create a flask_sqlalchemy object
 
@@ -52,10 +64,9 @@ def db(engine):
     #
     # Initialize flask and flask_sqlalchemy
     #
-    app = flask.Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONNECTION_URI
-
-    fs_db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    fs_db = SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    if "sqlalchemy" not in app.extensions:
+        fs_db.init_app(app)
     yield fs_db
 
     #

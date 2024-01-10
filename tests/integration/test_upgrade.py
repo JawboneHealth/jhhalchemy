@@ -2,7 +2,7 @@
 Integration test to verify upgrade behavior
 """
 import flask
-import flask_sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
 import jhhalchemy.migrate
 import jhhalchemy.model
 import pytest
@@ -47,7 +47,10 @@ def db(connect_str):
     app = flask.Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 
-    fs_db = flask_sqlalchemy.SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    fs_db = SQLAlchemy(app, model_class=jhhalchemy.model.Base)
+    if "sqlalchemy" not in app.extensions:
+        fs_db.init_app(app)
+
     yield fs_db
 
     #
