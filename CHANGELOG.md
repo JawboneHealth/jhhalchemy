@@ -4,9 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.8.0] - 2024-01-10
+### Changed
+- Updated to sqlalchemy v2
+- Updated other dependencies
+
 ## [0.7.1] - 2018-07-09
 ### Fixed
 - `__version__` corrected
+
 ## [0.7] - 2018-07-09
 ### Added
 - time_order helper function for API wrappers
